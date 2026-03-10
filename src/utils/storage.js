@@ -72,6 +72,7 @@ export function saveCreator(creator) {
 
 export function createCreator(data) {
   // TODO: replace with real API call
+  const ip = `${data.prefix}.${data.domain}`;
   const creator = {
     id: crypto.randomUUID(),
     name: data.name,
@@ -79,9 +80,10 @@ export function createCreator(data) {
     discord: data.discord,
     creatorType: data.creatorType,
     platform: data.platform,
-    ip: `${data.prefix}.${data.domain}`,
+    ip,
     prefix: data.prefix,
     server: data.server,
+    claimedServers: [{ serverId: data.server, prefix: data.prefix, ip }],
     claimedAt: new Date().toISOString(),
     videos: [],
     totalEarnings: 0,
@@ -184,6 +186,30 @@ export function getAdminSettings() {
 export function saveAdminSettings(settings) {
   // TODO: replace with real API call
   write("adminSettings", settings);
+}
+
+/* ─── Claimed IPs ─── */
+
+export function getCreatorClaimedServers(creator) {
+  if (creator.claimedServers?.length > 0) return creator.claimedServers;
+  // backward compat for creators created before multi-IP
+  if (creator.ip) return [{ serverId: creator.server, prefix: creator.prefix, ip: creator.ip }];
+  return [];
+}
+
+export function claimServerIP(creatorId, { serverId, prefix, domain }) {
+  const creator = getCreatorById(creatorId);
+  if (!creator) return null;
+  // migrate old data
+  if (!creator.claimedServers) {
+    creator.claimedServers = [{ serverId: creator.server, prefix: creator.prefix, ip: creator.ip }];
+  }
+  if (creator.claimedServers.find((cs) => cs.serverId === serverId)) return null;
+  const ip = `${prefix}.${domain}`;
+  creator.claimedServers.push({ serverId, prefix, ip });
+  saveCreator(creator);
+  addTakenPrefix(prefix);
+  return { serverId, prefix, ip };
 }
 
 /* ─── Servers ─── */

@@ -4,9 +4,12 @@ import {
   getCurrentCreator,
   addVideo,
   getAdminSettings,
+  getServers,
+  isPrefixTaken,
+  claimServerIP,
+  getCreatorClaimedServers,
 } from "../utils/storage";
 import { calculateTotalEarnings } from "../utils/earnings";
-import { getServers } from "../utils/storage";
 import StatCard from "../components/StatCard";
 import StatusBadge from "../components/StatusBadge";
 
@@ -65,6 +68,8 @@ export default function Dashboard() {
       return;
     }
     setCreator(c);
+    const claimed = getCreatorClaimedServers(c);
+    if (claimed.length > 0) setVideoServer(claimed[0].serverId);
   }, [navigate]);
 
   if (!creator) return null;
@@ -91,34 +96,33 @@ export default function Dashboard() {
     setVideoTitle("");
   };
 
-  const copyIP = () => {
-    navigator.clipboard.writeText(creator.ip);
-  };
+  const refresh = () => setCreator(getCurrentCreator());
 
   return (
     <section className="mx-auto max-w-4xl px-4 py-10">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h1 className="font-display text-2xl font-bold text-gray-900">
             Hey {creator.name.split(" ")[0]}
           </h1>
-          <button
-            onClick={copyIP}
-            className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-600 transition hover:bg-brand-100"
-          >
-            {creator.ip}
-            <svg
-              className="h-3.5 w-3.5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              viewBox="0 0 24 24"
-            >
-              <rect x="9" y="9" width="13" height="13" rx="2" />
-              <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-            </svg>
-          </button>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {getCreatorClaimedServers(creator).map((cs) => (
+              <button
+                key={cs.serverId}
+                onClick={() => navigator.clipboard.writeText(cs.ip)}
+                title="Click to copy"
+                className="inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-600 transition hover:bg-brand-100"
+              >
+                {cs.ip}
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <rect x="9" y="9" width="13" height="13" rx="2" />
+                  <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                </svg>
+              </button>
+            ))}
+          </div>
+          <ClaimIPForm creator={creator} onClaimed={refresh} />
         </div>
         <div className="text-right">
           <p className="text-sm text-gray-500">Estimated Earnings</p>
@@ -150,9 +154,10 @@ export default function Dashboard() {
                 onChange={(e) => setVideoServer(e.target.value)}
                 className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
               >
-                {servers.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name}</option>
-                ))}
+                {getCreatorClaimedServers(creator).map((cs) => {
+                  const s = servers.find((x) => x.id === cs.serverId);
+                  return <option key={cs.serverId} value={cs.serverId}>{s?.name || cs.serverId}</option>;
+                })}
               </select>
             </div>
             <div>
@@ -308,6 +313,137 @@ export default function Dashboard() {
         </div>
       </div>
     </section>
+  );
+}
+
+/* ─── Claim IP Form ─── */
+
+function ClaimIPForm({ creator, onClaimed }) {
+  const allServers = getServers();
+  const claimedIds = getCreatorClaimedServers(creator).map((cs) => cs.serverId);
+  const unclaimedServers = allServers.filter((s) => !claimedIds.includes(s.id));
+
+  const [open, setOpen] = useState(false);
+  const [selectedServerId, setSelectedServerId] = useState(unclaimedServers[0]?.id ?? "");
+  const [prefix, setPrefix] = useState(creator.prefix);
+  const [availability, setAvailability] = useState(null);
+
+  if (unclaimedServers.length === 0) return null;
+
+  const selectedServer = allServers.find((s) => s.id === selectedServerId);
+
+  const checkAvailability = () => {
+    if (!prefix.trim()) return;
+    setAvailability(isPrefixTaken(prefix) ? "taken" : "available");
+  };
+
+  const handleClaim = () => {
+    if (availability !== "available" || !selectedServer) return;
+    claimServerIP(creator.id, { serverId: selectedServer.id, prefix, domain: selectedServer.domain });
+    onClaimed();
+    setOpen(false);
+    setAvailability(null);
+  };
+
+  const inputCls =
+    "w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500";
+
+  return (
+    <div className="mt-2">
+      <button
+        onClick={() => setOpen(!open)}
+        className="inline-flex items-center gap-1 rounded-full border border-dashed border-brand-300 px-3 py-1 text-sm font-medium text-brand-500 transition hover:border-brand-500 hover:bg-brand-50"
+      >
+        + Claim another IP
+      </button>
+
+      {open && (
+        <div className="mt-3 rounded-card border border-gray-200 bg-gray-50 p-4">
+          <p className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-400">
+            Claim a new server IP
+          </p>
+
+          {/* Already claimed */}
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            <span className="text-xs text-gray-400">Already claimed:</span>
+            {allServers.filter((s) => claimedIds.includes(s.id)).map((s) => (
+              <span key={s.id} className="rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-400">
+                {s.name}
+              </span>
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">Server</label>
+                <select
+                  value={selectedServerId}
+                  onChange={(e) => { setSelectedServerId(e.target.value); setAvailability(null); }}
+                  className={inputCls}
+                >
+                  {unclaimedServers.map((s) => (
+                    <option key={s.id} value={s.id}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-gray-600">Prefix</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={prefix}
+                    onChange={(e) => { setPrefix(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, "")); setAvailability(null); }}
+                    className={inputCls}
+                    placeholder="yourname"
+                  />
+                  <button
+                    type="button"
+                    onClick={checkAvailability}
+                    disabled={!prefix}
+                    className="rounded-lg bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-700 disabled:opacity-40"
+                  >
+                    Check
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {selectedServer && prefix && (
+              <p className="text-xs text-gray-500">
+                Preview:{" "}
+                <span className="font-semibold text-brand-600">
+                  {prefix}.{selectedServer.domain}
+                </span>
+              </p>
+            )}
+
+            {availability === "taken" && (
+              <p className="text-xs text-red-500">This prefix is already taken.</p>
+            )}
+            {availability === "available" && (
+              <p className="text-xs text-green-600">Available!</p>
+            )}
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleClaim}
+                disabled={availability !== "available"}
+                className="rounded-card bg-brand-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-brand-600 disabled:opacity-40"
+              >
+                Claim IP
+              </button>
+              <button
+                onClick={() => setOpen(false)}
+                className="rounded-card border border-gray-300 px-4 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
