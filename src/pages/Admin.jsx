@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useT } from "../i18n";
 import {
   getCreators,
   getAllVideos,
@@ -66,6 +67,7 @@ export default function Admin() {
 /* ─── Header stats ─── */
 
 function AdminHeader() {
+  const t = useT();
   const creators = getCreators();
   const videos = getAllVideos();
   const pending = videos.filter((v) => v.status === "pending").length;
@@ -73,12 +75,12 @@ function AdminHeader() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-bold text-gray-900">Admin Panel</h1>
+      <h1 className="font-display text-2xl font-bold text-gray-900">{t("admin_title")}</h1>
       <div className="mt-6 grid gap-4 sm:grid-cols-4">
-        <StatCard label="Total Creators" value={creators.length} />
-        <StatCard label="Total Videos" value={videos.length} />
-        <StatCard label="Pending Reviews" value={pending} />
-        <StatCard label="Total Paid Out" value={`$${totalPaid.toFixed(2)}`} />
+        <StatCard label={t("admin_stat_creators")} value={creators.length} />
+        <StatCard label={t("admin_stat_videos")} value={videos.length} />
+        <StatCard label={t("admin_stat_pending")} value={pending} />
+        <StatCard label={t("admin_stat_paid")} value={`$${totalPaid.toFixed(2)}`} />
       </div>
     </div>
   );

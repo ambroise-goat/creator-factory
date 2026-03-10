@@ -10,6 +10,7 @@ import {
   getCreatorClaimedServers,
 } from "../utils/storage";
 import { calculateTotalEarnings } from "../utils/earnings";
+import { useT } from "../i18n";
 import StatCard from "../components/StatCard";
 import StatusBadge from "../components/StatusBadge";
 
@@ -50,6 +51,7 @@ function Tooltip({ text }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const t = useT();
   const [creator, setCreator] = useState(null);
   const [tab, setTab] = useState("brief");
 
@@ -125,29 +127,29 @@ export default function Dashboard() {
           <ClaimIPForm creator={creator} onClaimed={refresh} />
         </div>
         <div className="text-right">
-          <p className="text-sm text-gray-500">Estimated Earnings</p>
+          <p className="text-sm text-gray-500">{t("dash_earnings_label")}</p>
           <p className="font-display text-3xl font-bold text-brand-500">
             ${totalEarnings.toFixed(2)}
           </p>
-          <p className="text-xs text-gray-400">Cap: ${settings.earningsCap}</p>
+          <p className="text-xs text-gray-400">{t("dash_cap")} ${settings.earningsCap}</p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        <StatCard label="Total Videos Submitted" value={creator.videos.length} />
-        <StatCard label="Approved Videos" value={approvedVideos.length} />
-        <StatCard label="Estimated Earnings ($)" value={`$${totalEarnings.toFixed(2)}`} />
+        <StatCard label={t("dash_stat_total")} value={creator.videos.length} />
+        <StatCard label={t("dash_stat_approved")} value={approvedVideos.length} />
+        <StatCard label={t("dash_stat_earnings")} value={`$${totalEarnings.toFixed(2)}`} />
       </div>
 
       {/* Submit Video */}
       <div className="mt-10 rounded-card bg-white p-6 shadow-sm">
-        <h2 className="font-display text-lg font-bold text-gray-900">Submit a Video</h2>
+        <h2 className="font-display text-lg font-bold text-gray-900">{t("dash_submit_title")}</h2>
         <form onSubmit={handleSubmitVideo} className="mt-4 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Server
+                {t("dash_server")}
               </label>
               <select
                 value={videoServer}
@@ -162,7 +164,7 @@ export default function Dashboard() {
             </div>
             <div>
               <label className="mb-1 block text-sm font-medium text-gray-700">
-                Video title
+                {t("dash_video_title")}
               </label>
               <input
                 type="text"
@@ -176,8 +178,8 @@ export default function Dashboard() {
 
           <div>
             <label className="mb-2 block text-sm font-medium text-gray-700">
-              Platform URLs{" "}
-              <span className="font-normal text-gray-400">(at least one required)</span>
+              {t("dash_platform_urls")}{" "}
+              <span className="font-normal text-gray-400">{t("dash_platform_required")}</span>
             </label>
             <div className="space-y-2">
               {PLATFORMS.map((p) => (
@@ -196,9 +198,7 @@ export default function Dashboard() {
               ))}
             </div>
             {urlError && (
-              <p className="mt-1 text-xs text-red-500">
-                Please enter at least one platform URL.
-              </p>
+              <p className="mt-1 text-xs text-red-500">{t("dash_platform_error")}</p>
             )}
           </div>
 
@@ -206,7 +206,7 @@ export default function Dashboard() {
             type="submit"
             className="rounded-card bg-brand-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-brand-600"
           >
-            Submit Video
+            {t("dash_submit_btn")}
           </button>
         </form>
       </div>
@@ -217,15 +217,15 @@ export default function Dashboard() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gray-100 text-xs uppercase text-gray-500">
               <tr>
-                <th className="px-4 py-3">Title</th>
-                <th className="px-4 py-3">Server</th>
-                <th className="px-4 py-3">Platforms</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3 text-right">Views</th>
-                <th className="px-4 py-3 text-right">Joins</th>
+                <th className="px-4 py-3">{t("dash_table_title")}</th>
+                <th className="px-4 py-3">{t("dash_table_server")}</th>
+                <th className="px-4 py-3">{t("dash_table_platforms")}</th>
+                <th className="px-4 py-3">{t("dash_table_status")}</th>
+                <th className="px-4 py-3 text-right">{t("dash_table_views")}</th>
+                <th className="px-4 py-3 text-right">{t("dash_table_joins")}</th>
                 <th className="px-4 py-3 text-right">
                   <span className="inline-flex items-center justify-end gap-1">
-                    Earnings
+                    {t("dash_table_earnings")}
                     <Tooltip
                       text={`$${settings.ratePerKViews.toFixed(2)} per 1k views${settings.ratePerJoin > 0 ? ` · $${settings.ratePerJoin.toFixed(2)} per join` : ""}`}
                     />
@@ -247,7 +247,7 @@ export default function Dashboard() {
                 return (
                   <tr key={v.id}>
                     <td className="px-4 py-3 font-medium text-gray-900">
-                      {v.title || "Untitled"}
+                      {v.title || t("dash_untitled")}
                     </td>
                     <td className="px-4 py-3 text-gray-600">{serverName}</td>
                     <td className="px-4 py-3">
@@ -277,7 +277,7 @@ export default function Dashboard() {
                     <td className="px-4 py-3 text-right font-medium text-gray-900">
                       ${estEarnings.toFixed(2)}
                       {v.status !== "approved" && (
-                        <span className="ml-1 text-xs font-normal text-gray-400">est.</span>
+                        <span className="ml-1 text-xs font-normal text-gray-400">{t("dash_est")}</span>
                       )}
                     </td>
                   </tr>
@@ -291,17 +291,21 @@ export default function Dashboard() {
       {/* Server Brief Section */}
       <div className="mt-10 rounded-card bg-white p-6 shadow-sm">
         <div className="flex gap-1 border-b border-gray-100">
-          {["brief", "examples", "faq"].map((t) => (
+          {[
+            { key: "brief", label: t("dash_tab_brief") },
+            { key: "examples", label: t("dash_tab_examples") },
+            { key: "faq", label: t("dash_tab_faq") },
+          ].map((item) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
+              key={item.key}
+              onClick={() => setTab(item.key)}
               className={`px-4 py-2 text-sm font-medium capitalize transition ${
-                tab === t
+                tab === item.key
                   ? "border-b-2 border-brand-500 text-brand-600"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              {t}
+              {item.label}
             </button>
           ))}
         </div>
@@ -319,6 +323,7 @@ export default function Dashboard() {
 /* ─── Claim IP Form ─── */
 
 function ClaimIPForm({ creator, onClaimed }) {
+  const t = useT();
   const allServers = getServers();
   const claimedIds = getCreatorClaimedServers(creator).map((cs) => cs.serverId);
   const unclaimedServers = allServers.filter((s) => !claimedIds.includes(s.id));
@@ -354,18 +359,17 @@ function ClaimIPForm({ creator, onClaimed }) {
         onClick={() => setOpen(!open)}
         className="inline-flex items-center gap-1 rounded-full border border-dashed border-brand-300 px-3 py-1 text-sm font-medium text-brand-500 transition hover:border-brand-500 hover:bg-brand-50"
       >
-        + Claim another IP
+        {t("claim_another")}
       </button>
 
       {open && (
         <div className="mt-3 rounded-card border border-gray-200 bg-gray-50 p-4">
           <p className="mb-3 text-xs font-bold uppercase tracking-wide text-gray-400">
-            Claim a new server IP
+            {t("claim_title")}
           </p>
 
-          {/* Already claimed */}
           <div className="mb-3 flex flex-wrap gap-1.5">
-            <span className="text-xs text-gray-400">Already claimed:</span>
+            <span className="text-xs text-gray-400">{t("claim_already")}</span>
             {allServers.filter((s) => claimedIds.includes(s.id)).map((s) => (
               <span key={s.id} className="rounded-full bg-gray-200 px-2 py-0.5 text-xs text-gray-400">
                 {s.name}
@@ -376,7 +380,7 @@ function ClaimIPForm({ creator, onClaimed }) {
           <div className="space-y-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">Server</label>
+                <label className="mb-1 block text-xs font-medium text-gray-600">{t("claim_server")}</label>
                 <select
                   value={selectedServerId}
                   onChange={(e) => { setSelectedServerId(e.target.value); setAvailability(null); }}
@@ -388,7 +392,7 @@ function ClaimIPForm({ creator, onClaimed }) {
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-medium text-gray-600">Prefix</label>
+                <label className="mb-1 block text-xs font-medium text-gray-600">{t("claim_prefix")}</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -403,7 +407,7 @@ function ClaimIPForm({ creator, onClaimed }) {
                     disabled={!prefix}
                     className="rounded-lg bg-gray-900 px-3 py-2 text-xs font-medium text-white hover:bg-gray-700 disabled:opacity-40"
                   >
-                    Check
+                    {t("claim_check")}
                   </button>
                 </div>
               </div>
@@ -411,7 +415,7 @@ function ClaimIPForm({ creator, onClaimed }) {
 
             {selectedServer && prefix && (
               <p className="text-xs text-gray-500">
-                Preview:{" "}
+                {t("claim_preview")}{" "}
                 <span className="font-semibold text-brand-600">
                   {prefix}.{selectedServer.domain}
                 </span>
@@ -419,10 +423,10 @@ function ClaimIPForm({ creator, onClaimed }) {
             )}
 
             {availability === "taken" && (
-              <p className="text-xs text-red-500">This prefix is already taken.</p>
+              <p className="text-xs text-red-500">{t("claim_taken")}</p>
             )}
             {availability === "available" && (
-              <p className="text-xs text-green-600">Available!</p>
+              <p className="text-xs text-green-600">{t("claim_available")}</p>
             )}
 
             <div className="flex gap-2">
@@ -431,13 +435,13 @@ function ClaimIPForm({ creator, onClaimed }) {
                 disabled={availability !== "available"}
                 className="rounded-card bg-brand-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-brand-600 disabled:opacity-40"
               >
-                Claim IP
+                {t("claim_btn")}
               </button>
               <button
                 onClick={() => setOpen(false)}
                 className="rounded-card border border-gray-300 px-4 py-2 text-xs font-medium text-gray-600 transition hover:bg-gray-50"
               >
-                Cancel
+                {t("claim_cancel")}
               </button>
             </div>
           </div>
@@ -450,26 +454,13 @@ function ClaimIPForm({ creator, onClaimed }) {
 /* ─── Tabs ─── */
 
 function BriefTab() {
+  const t = useT();
   return (
     <div className="space-y-3 text-sm text-gray-600">
-      {/* TODO: fill with real brief */}
-      <p>
-        <strong>Goal:</strong> Create short-form vertical videos (30–60 seconds) that
-        showcase exciting moments on the server and drive players to join.
-      </p>
-      <p>
-        <strong>Required CTA:</strong> Every video must include your personalized IP as a
-        call-to-action, either spoken, shown on-screen, or both. Example: "Join me at
-        martin.blocaria.com!"
-      </p>
-      <p>
-        <strong>Content ideas:</strong> Epic builds, PvP moments, first-time reactions,
-        tutorials, server events, hidden secrets.
-      </p>
-      <p>
-        <strong>Do not:</strong> Use offensive language, show exploits/hacks, or include
-        content from other servers.
-      </p>
+      <p><strong>{t("brief_goal_label")}</strong> {t("brief_goal")}</p>
+      <p><strong>{t("brief_cta_label")}</strong> {t("brief_cta")}</p>
+      <p><strong>{t("brief_ideas_label")}</strong> {t("brief_ideas")}</p>
+      <p><strong>{t("brief_donot_label")}</strong> {t("brief_donot")}</p>
     </div>
   );
 }
@@ -498,19 +489,11 @@ function ExamplesTab() {
 }
 
 function FAQTab() {
+  const t = useT();
   const faqs = [
-    {
-      q: "When do I get paid?",
-      a: "Payments are processed monthly. Once your videos are approved and earnings are calculated, you'll receive payment via your preferred method.",
-    },
-    {
-      q: "Who is eligible?",
-      a: "Anyone with a YouTube, TikTok, Instagram, or Snapchat account can join. There's no minimum follower count required.",
-    },
-    {
-      q: "Is there an earnings cap?",
-      a: "Yes, there is a per-creator earnings cap set by the admin. Check your dashboard for the current cap amount.",
-    },
+    { q: t("faq_q1"), a: t("faq_a1") },
+    { q: t("faq_q2"), a: t("faq_a2") },
+    { q: t("faq_q3"), a: t("faq_a3") },
   ];
 
   return (

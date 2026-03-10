@@ -6,9 +6,11 @@ import Join from "./pages/Join";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
 import ServerDetail from "./pages/ServerDetail";
+import { LanguageProvider } from "./i18n";
 
 export default function App() {
   return (
+    <LanguageProvider>
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <main className="flex-1">
@@ -22,5 +24,6 @@ export default function App() {
       </main>
       <Footer />
     </div>
+    </LanguageProvider>
   );
 }

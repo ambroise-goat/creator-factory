@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { getServers } from "../utils/storage";
+import { useT } from "../i18n";
 
 export default function Landing() {
   return (
@@ -16,30 +17,30 @@ export default function Landing() {
 /* ─── Hero ─── */
 
 function Hero() {
+  const t = useT();
   return (
     <section className="bg-white">
       <div className="mx-auto max-w-4xl px-4 py-24 text-center">
         <h1 className="font-display text-4xl font-extrabold leading-tight text-gray-900 sm:text-5xl md:text-6xl">
-          Make Minecraft Videos
+          {t("hero_title1")}
           <br />
-          <span className="text-brand-500">and Get Paid</span>
+          <span className="text-brand-500">{t("hero_title2")}</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-          Create short videos for our Minecraft servers, share your personalized IP, and
-          earn money based on your performance.
+          {t("hero_subtitle")}
         </p>
         <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <Link
             to="/join"
             className="rounded-card bg-brand-500 px-8 py-3 text-base font-semibold text-white shadow transition hover:bg-brand-600"
           >
-            Join the Program
+            {t("hero_cta_join")}
           </Link>
           <a
             href="#how-it-works"
             className="rounded-card border border-gray-300 px-8 py-3 text-base font-semibold text-gray-700 transition hover:border-brand-500 hover:text-brand-500"
           >
-            See How It Works
+            {t("hero_cta_how")}
           </a>
         </div>
       </div>
@@ -50,11 +51,12 @@ function Hero() {
 /* ─── How It Works ─── */
 
 function HowItWorks() {
+  const t = useT();
   return (
     <section id="how-it-works" className="bg-surface py-20">
       <div className="mx-auto max-w-5xl px-4">
         <h2 className="text-center font-display text-3xl font-bold text-gray-900">
-          How It Works
+          {t("how_title")}
         </h2>
         <div className="mt-12 grid gap-8 sm:grid-cols-2">
           <AnimatedCard delay={0}>
@@ -62,13 +64,14 @@ function HowItWorks() {
               1
             </div>
             <h3 className="mt-4 font-display text-xl font-bold text-gray-900">
-              Claim your IP
+              {t("how_step1_title")}
             </h3>
             <p className="mt-2 text-gray-600">
-              Register and reserve a personalized subdomain like{" "}
-              <span className="font-semibold text-brand-500">yourname.blocaria.com</span>.
-              This is your unique link — every player who joins through it is attributed to
-              you.
+              {t("how_step1_desc").split("yourname.blocaria.com").map((part, i, arr) =>
+                i < arr.length - 1 ? (
+                  <span key={i}>{part}<span className="font-semibold text-brand-500">yourname.blocaria.com</span></span>
+                ) : part
+              )}
             </p>
           </AnimatedCard>
 
@@ -77,12 +80,9 @@ function HowItWorks() {
               2
             </div>
             <h3 className="mt-4 font-display text-xl font-bold text-gray-900">
-              Post &amp; Earn
+              {t("how_step2_title")}
             </h3>
-            <p className="mt-2 text-gray-600">
-              Make short-form videos with your IP as the CTA, submit the URLs on your
-              dashboard, and get paid per unique join or per 1k views.
-            </p>
+            <p className="mt-2 text-gray-600">{t("how_step2_desc")}</p>
           </AnimatedCard>
         </div>
       </div>
@@ -125,13 +125,14 @@ function AnimatedCard({ children, delay = 0 }) {
 /* ─── Video Examples ─── */
 
 function VideoExamples() {
+  const t = useT();
   const videoIds = ["v8MlsJnigOA", "8YB_Zd0OOI0", "KAFPU8m8irQ"];
 
   return (
     <section className="bg-white py-20">
       <div className="mx-auto max-w-4xl px-4">
         <h2 className="text-center font-display text-3xl font-bold text-gray-900">
-          Example Creator Videos
+          {t("videos_title")}
         </h2>
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
           {videoIds.map((id, i) => (
@@ -156,12 +157,13 @@ function VideoExamples() {
 /* ─── Servers ─── */
 
 function ServersSection() {
+  const t = useT();
   const servers = getServers();
   return (
     <section className="bg-surface py-20">
       <div className="mx-auto max-w-5xl px-4">
         <h2 className="text-center font-display text-3xl font-bold text-gray-900">
-          Our Servers
+          {t("servers_title")}
         </h2>
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
           {servers.map((s) => (
@@ -178,7 +180,7 @@ function ServersSection() {
                 {s.domain}
               </p>
               <p className="mt-3 text-xs font-medium text-brand-500 opacity-0 group-hover:opacity-100 transition-opacity text-center">
-                Learn more →
+                {t("servers_learnmore")}
               </p>
             </Link>
           ))}

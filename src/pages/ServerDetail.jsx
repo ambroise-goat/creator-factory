@@ -1,8 +1,10 @@
 import { useParams, Link } from "react-router-dom";
 import { getServers } from "../utils/storage";
+import { useT } from "../i18n";
 
 export default function ServerDetail() {
   const { id } = useParams();
+  const t = useT();
   const server = getServers().find((s) => s.id === id);
 
   if (!server) {
@@ -10,7 +12,7 @@ export default function ServerDetail() {
       <div className="mx-auto max-w-2xl px-4 py-24 text-center">
         <p className="text-gray-500">Server not found.</p>
         <Link to="/" className="mt-4 inline-block text-brand-500 hover:underline">
-          ← Back to home
+          {t("server_back")}
         </Link>
       </div>
     );
@@ -18,38 +20,31 @@ export default function ServerDetail() {
 
   return (
     <>
-      {/* Hero */}
       <section className="bg-brand-500 py-16 text-white">
         <div className="mx-auto max-w-3xl px-4">
-          <Link
-            to="/"
-            className="mb-6 inline-flex items-center gap-1 text-sm text-brand-200 hover:text-white"
-          >
-            ← Back
+          <Link to="/" className="mb-6 inline-flex items-center gap-1 text-sm text-brand-200 hover:text-white">
+            {t("server_back")}
           </Link>
           <h1 className="font-display text-4xl font-extrabold sm:text-5xl">{server.name}</h1>
           <p className="mt-3 text-lg text-brand-100">{server.description}</p>
           <div className="mt-6 flex flex-wrap gap-2">
-            <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-medium">
-              {server.domain}
-            </span>
+            <span className="rounded-full bg-white/20 px-3 py-1 text-sm font-medium">{server.domain}</span>
           </div>
           <Link
             to="/join"
             className="mt-8 inline-block rounded-card bg-white px-8 py-3 font-semibold text-brand-600 shadow transition hover:bg-brand-50"
           >
-            Become a Creator for {server.name}
+            {t("server_cta")} {server.name}
           </Link>
         </div>
       </section>
 
-      {/* Content */}
       <section className="bg-surface py-16">
         <div className="mx-auto max-w-3xl px-4">
           {server.longDescription ? (
             <DescriptionRenderer text={server.longDescription} />
           ) : (
-            <p className="text-gray-500">No description available yet.</p>
+            <p className="text-gray-500">{t("server_no_desc")}</p>
           )}
         </div>
       </section>
