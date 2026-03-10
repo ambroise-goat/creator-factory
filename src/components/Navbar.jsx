@@ -10,7 +10,7 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-white/80 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
         <Link to="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="Creator Factory" className="h-8 w-8" />
+          <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Creator Factory" className="h-8 w-8" />
           <span className="font-display text-xl font-extrabold text-brand-500">Creator Factory</span>
         </Link>
 
