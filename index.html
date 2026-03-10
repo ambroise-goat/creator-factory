@@ -2,6 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function(l) {
+        if (l.search[1] === 'p') {
+          var params = l.search.slice(1).split('&');
+          var path = params[0].slice(2).replace(/~and~/g, '&');
+          var query = params[1] ? '?' + params[1].slice(2).replace(/~and~/g, '&') : '';
+          window.history.replaceState(null, null, l.pathname + path + query + l.hash);
+        }
+      }(window.location));
+    </script>
     <link rel="icon" type="image/svg+xml" href="/creator-factory/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Creator Factory — Make Minecraft Videos and Get Paid</title>
@@ -11,8 +21,8 @@
       href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap"
       rel="stylesheet"
     />
-    <script type="module" crossorigin src="/creator-factory/assets/index-CgKAD5WE.js"></script>
-    <link rel="stylesheet" crossorigin href="/creator-factory/assets/index-B_eP33Gy.css">
+    <script type="module" crossorigin src="/creator-factory/assets/index-Cr1alGJJ.js"></script>
+    <link rel="stylesheet" crossorigin href="/creator-factory/assets/index-nrKWJZwo.css">
   </head>
   <body class="bg-surface font-body text-gray-800 antialiased">
     <div id="root"></div>
